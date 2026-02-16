@@ -75,17 +75,10 @@ class NPE_C(PosteriorEstimatorTrainer):
         proposal = prior
 
         for round_idx in range(5):
-            # Simulate from proposal
             theta = proposal.sample((100,))
             x = simulator(theta)
-
-            # Append simulations and train
             density_estimator = inference.append_simulations(theta, x).train()
-
-            # Build posterior conditioned on x_o
             posterior = inference.build_posterior(density_estimator)
-
-            # Update proposal for next round
             proposal = posterior.set_default_x(x_o)
 
         # 3. Sample from final posterior

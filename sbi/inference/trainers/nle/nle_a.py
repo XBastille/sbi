@@ -20,11 +20,10 @@ class NLE_A(LikelihoodEstimatorTrainer):
 
     NLE trains a neural network to approximate the likelihood $p(x|\theta)$ using a
     conditional density estimator (normalizing flow). Unlike NPE methods, which directly
-    estimate the posterior, NLE estimates the likelihood. Posterior sampling is then
-    performed via MCMC, rejection sampling, or variational inference.
+    estimate the posterior, NLE estimates the likelihood.
 
-    This can be run multi-round without need for correction, but requires running MCMC
-    in each round.
+    NLE can be run multi-round without need for correction, but requires running
+    potentially expensive posterior sampling in each round.
 
     [1] Sequential Neural Likelihood: Fast Likelihood-free Inference with
         Autoregressive Flows, Papamakarios et al., AISTATS 2019,

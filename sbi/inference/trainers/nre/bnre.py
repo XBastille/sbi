@@ -26,8 +26,8 @@ class BNRE(NRE_A):
     conservative and reliable posterior approximations. BNRE is particularly useful
     when robustness is prioritized over tightness of the posterior.
 
-    This can be run multi-round without need for correction, but requires running MCMC
-    in each round.
+    NRE can be run multi-round without need for correction, but requires running
+    potentially expensive posterior sampling in each round.
 
     [1] Towards Reliable Simulation-Based Inference with Balanced Neural Ratio
         Estimation, Delaunoy, A., Hermans, J., Rozet, F., Wehenkel, A., & Louppe, G.,

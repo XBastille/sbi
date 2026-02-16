@@ -28,8 +28,8 @@ class NRE_B(RatioEstimatorTrainer):
     samples from the marginals $p(\theta)p(x)$. This multi-class formulation improves
     training stability compared to NRE-A.
 
-    This can be run multi-round without need for correction, but requires running MCMC
-    in each round.
+    NRE can be run multi-round without need for correction, but requires running
+    potentially expensive posterior sampling in each round.
 
     [1] *On Contrastive Learning for Likelihood-free Inference*, Durkan et al.,
         ICML 2020, https://arxiv.org/pdf/2002.03712

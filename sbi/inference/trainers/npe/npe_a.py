@@ -36,9 +36,11 @@ class NPE_A(PosteriorEstimatorTrainer):
     NPE-A (also known as SNPE-A) trains a neural network to directly approximate
     the posterior $p(\theta|x)$ using a Mixture of Gaussians. In multi-round
     inference, it applies a post-hoc analytical correction to account for training
-    with proposal distributions. This correction requires Gaussian proposal
-    distributions in all rounds except the last, where a Mixture of Gaussians can
-    be used.
+    with proposal distributions. Due to the analytical correction, this method is
+    restricted to using Mixture of Gaussians (no flows).
+
+    For single-round inference, NPE-A, NPE-B, and NPE-C are equivalent and use
+    plain NLL loss.
 
     [1] *Fast epsilon-free Inference of Simulation Models with Bayesian
         Conditional Density Estimation*, Papamakarios et al., NeurIPS 2016.
@@ -53,20 +55,32 @@ class NPE_A(PosteriorEstimatorTrainer):
         from sbi.inference import NPE_A
         from sbi.utils import BoxUniform
 
-        # 1. Setup prior and simulate data
+        # 1. Setup simulator, prior, and observation
         prior = BoxUniform(low=torch.zeros(3), high=torch.ones(3))
-        theta = prior.sample((100,))
-        x = theta + torch.randn_like(theta) * 0.1
+        x_o = torch.randn(1, 3)  # Observed data
 
-        # 2. Train posterior estimator
+        def simulator(theta):
+            return theta + torch.randn_like(theta) * 0.1
+
+        # 2. Multi-round inference
         inference = NPE_A(prior=prior, num_components=5)
-        density_estimator = inference.append_simulations(theta, x).train()
+        proposal = prior
 
-        # 3. Build posterior with post-hoc correction
-        posterior = inference.build_posterior(density_estimator)
+        for round_idx in range(5):
+            # Simulate from proposal
+            theta = proposal.sample((100,))
+            x = simulator(theta)
 
-        # 4. Sample from posterior
-        x_o = torch.randn(1, 3)
+            # Append simulations and train
+            density_estimator = inference.append_simulations(theta, x).train()
+
+            # Build posterior conditioned on x_o
+            posterior = inference.build_posterior(density_estimator)
+
+            # Update proposal for next round
+            proposal = posterior.set_default_x(x_o)
+
+        # 3. Sample from final posterior
         samples = posterior.sample((1000,), x=x_o)
     """
 

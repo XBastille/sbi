@@ -28,8 +28,13 @@ class FMPE(VectorFieldTrainer):
     FMPE trains a continuous normalizing flow (CNF) to transform samples from the
     prior distribution to the posterior distribution using flow matching. Instead of
     maximum likelihood, it trains a vector field to match the marginal vector field
-    of a conditional flow that interpolates between the prior and posterior. Sampling
-    is performed by solving an ODE.
+    of a conditional flow that interpolates between the prior and posterior. The
+    neural network architecture for the vector field is not constrained like for
+    flows and can be any expressive network. Sampling is performed by solving an ODE,
+    which can be slower than flow-based NPE, but log_prob evaluation can also be slower.
+
+    NOTE: FMPE does not support multi-round inference with flexible proposals yet.
+    You can try multi-round with truncated proposals, but this is not tested.
 
     [1] Flow Matching for Generative Modeling, Lipman et al., ICLR 2023,
         https://arxiv.org/abs/2210.02747

@@ -22,11 +22,14 @@ from sbi.utils.torchutils import assert_all_finite
 class NRE_B(RatioEstimatorTrainer):
     r"""Neural Ratio Estimation (NRE-B / SRE) as in Durkan et al. (2020) [1].
 
-    NRE-B trains a neural classifier using a contrastive (1-out-of-K) loss to estimate
-    the likelihood-to-evidence ratio. Instead of binary classification, it contrasts
-    one sample from the joint $p(\theta, x)$ against $K-1$ samples from the marginals
-    $p(\theta)p(x)$. This multi-class formulation can improve training stability and
-    performance.
+    NRE-B is an extension of NRE-A that trains a neural classifier using a contrastive
+    (1-out-of-K) loss to estimate the likelihood-to-evidence ratio. Instead of binary
+    classification, it contrasts one sample from the joint $p(\theta, x)$ against $K-1$
+    samples from the marginals $p(\theta)p(x)$. This multi-class formulation improves
+    training stability compared to NRE-A.
+
+    This can be run multi-round without need for correction, but requires running MCMC
+    in each round.
 
     [1] *On Contrastive Learning for Likelihood-free Inference*, Durkan et al.,
         ICML 2020, https://arxiv.org/pdf/2002.03712

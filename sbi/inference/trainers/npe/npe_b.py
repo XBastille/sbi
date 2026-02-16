@@ -30,6 +30,9 @@ class NPE_B(PosteriorEstimatorTrainer):
     inference, and it is not limited to Gaussian proposals. NPE-B can use flexible
     density estimators like normalizing flows.
 
+    For single-round inference, NPE-A, NPE-B, and NPE-C are equivalent and use
+    plain NLL loss.
+
     [1] *Flexible statistical inference for mechanistic models of neural
         dynamics*, Lueckmann, Gonçalves et al., NeurIPS 2017.
         https://arxiv.org/abs/1711.01861
@@ -43,20 +46,32 @@ class NPE_B(PosteriorEstimatorTrainer):
         from sbi.inference import NPE_B
         from sbi.utils import BoxUniform
 
-        # 1. Setup prior and simulate data
+        # 1. Setup simulator, prior, and observation
         prior = BoxUniform(low=torch.zeros(3), high=torch.ones(3))
-        theta = prior.sample((100,))
-        x = theta + torch.randn_like(theta) * 0.1
+        x_o = torch.randn(1, 3)  # Observed data
 
-        # 2. Train posterior estimator
+        def simulator(theta):
+            return theta + torch.randn_like(theta) * 0.1
+
+        # 2. Multi-round inference
         inference = NPE_B(prior=prior)
-        density_estimator = inference.append_simulations(theta, x).train()
+        proposal = prior
 
-        # 3. Build posterior
-        posterior = inference.build_posterior(density_estimator)
+        for round_idx in range(5):
+            # Simulate from proposal
+            theta = proposal.sample((100,))
+            x = simulator(theta)
 
-        # 4. Sample from posterior
-        x_o = torch.randn(1, 3)
+            # Append simulations and train
+            density_estimator = inference.append_simulations(theta, x).train()
+
+            # Build posterior conditioned on x_o
+            posterior = inference.build_posterior(density_estimator)
+
+            # Update proposal for next round
+            proposal = posterior.set_default_x(x_o)
+
+        # 3. Sample from final posterior
         samples = posterior.sample((1000,), x=x_o)
     """
 

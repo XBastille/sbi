@@ -26,6 +26,9 @@ class BNRE(NRE_A):
     conservative and reliable posterior approximations. BNRE is particularly useful
     when robustness is prioritized over tightness of the posterior.
 
+    This can be run multi-round without need for correction, but requires running MCMC
+    in each round.
+
     [1] Towards Reliable Simulation-Based Inference with Balanced Neural Ratio
         Estimation, Delaunoy, A., Hermans, J., Rozet, F., Wehenkel, A., & Louppe, G.,
         NeurIPS 2022. https://arxiv.org/abs/2208.13624
@@ -46,6 +49,7 @@ class BNRE(NRE_A):
 
         # 2. Train balanced ratio estimator
         inference = BNRE(prior=prior)
+        # Note: regularization_strength needs to be tuned carefully for your problem
         ratio_estimator = inference.append_simulations(theta, x).train(
             regularization_strength=100.0
         )

@@ -55,7 +55,7 @@ class MarginalTrainer:
 
         # 3. Evaluate log probability of new observations
         x_new = torch.randn(10, 3)
-        log_prob = -marginal_estimator.loss(x_new)
+        log_prob = marginal_estimator.log_prob(x_new)
     """
 
     def __init__(

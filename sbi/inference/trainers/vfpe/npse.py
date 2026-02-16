@@ -22,10 +22,11 @@ class NPSE(VectorFieldTrainer):
     r"""Neural Posterior Score Estimation (NPSE) [1, 2].
 
     NPSE trains a neural network to estimate the score function (gradient of the log
-    density) $\nabla_\theta \log p(\theta|x)$ using denoising score matching. Instead
-    of directly estimating the density, NPSE learns the score of a diffusion process
-    that transforms the prior into the posterior. Sampling is performed using SDE
-    solvers (e.g., Langevin dynamics) or ODE solvers.
+    posterior) $\nabla_\theta \log p(\theta|x)$ using denoising score matching. NPSE
+    learns the score of a diffusion process that transforms the prior into the
+    posterior. The neural network can be any expressive architecture. Sampling is
+    performed using SDE solvers (e.g., Langevin dynamics) or ODE solvers, which can
+    be slower than flow-based NPE, but expressiveness can be higher.
 
     NOTE: NPSE does not support multi-round inference with flexible proposals yet.
     You can try multi-round with truncated proposals, but this is not tested.

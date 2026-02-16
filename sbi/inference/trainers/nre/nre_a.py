@@ -25,8 +25,11 @@ class NRE_A(RatioEstimatorTrainer):
     NRE-A trains a neural classifier to estimate the likelihood-to-evidence ratio
     $r(\theta, x) = p(x|\theta) / p(x)$ by distinguishing between samples from the
     joint distribution $p(\theta, x)$ and samples from the marginals $p(\theta)p(x)$.
-    Posterior sampling is then performed via MCMC or rejection sampling using the
-    estimated ratio.
+    Posterior sampling is then performed via MCMC, rejection sampling, or variational
+    inference using the estimated ratio.
+
+    This can be run multi-round without need for correction, but requires running MCMC
+    in each round.
 
     [1] *Likelihood-free MCMC with Amortized Approximate Likelihood Ratios*, Hermans
         et al., ICML 2020, https://arxiv.org/abs/1903.04057

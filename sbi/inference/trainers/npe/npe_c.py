@@ -39,12 +39,17 @@ from sbi.utils.torchutils import BoxUniform, assert_all_finite
 class NPE_C(PosteriorEstimatorTrainer):
     r"""Neural Posterior Estimation algorithm (NPE-C) as in Greenberg et al. (2019) [1].
 
-    NPE-C (also known as APT - Automatic Posterior Transformation) trains a neural
-    network to directly approximate the posterior $p(\theta|x)$. In multi-round
-    inference, it uses an atomic or non-atomic loss to correct for training with
-    proposal distributions. The non-atomic loss (for Mixture of Gaussians) avoids
-    leakage issues, while the atomic loss works with any density estimator but may
-    suffer from leakage.
+    NPE-C (also known as APT - Automatic Posterior Transformation, aka SNPE-C) trains
+    a neural network over multiple rounds to directly approximate the posterior for a
+    specific observation x_o. In the first round, NPE-C is equivalent to other NPE
+    methods and is fully amortized (direct inference for any new observation). After
+    the first round, NPE-C automatically selects between two loss variants depending
+    on the chosen density estimator: the non-atomic loss (for Mixture of Gaussians)
+    which is stable and avoids leakage, or the atomic loss (for flows) which is more
+    flexible but may suffer from leakage issues.
+
+    For single-round inference, NPE-A, NPE-B, and NPE-C are equivalent and use
+    plain NLL loss.
 
     [1] *Automatic Posterior Transformation for Likelihood-free Inference*,
         Greenberg et al., ICML 2019, https://arxiv.org/abs/1905.07488.
@@ -58,20 +63,32 @@ class NPE_C(PosteriorEstimatorTrainer):
         from sbi.inference import NPE_C
         from sbi.utils import BoxUniform
 
-        # 1. Setup prior and simulate data
+        # 1. Setup simulator, prior, and observation
         prior = BoxUniform(low=torch.zeros(3), high=torch.ones(3))
-        theta = prior.sample((100,))
-        x = theta + torch.randn_like(theta) * 0.1
+        x_o = torch.randn(1, 3)  # Observed data
 
-        # 2. Train posterior estimator
+        def simulator(theta):
+            return theta + torch.randn_like(theta) * 0.1
+
+        # 2. Multi-round inference
         inference = NPE_C(prior=prior)
-        density_estimator = inference.append_simulations(theta, x).train()
+        proposal = prior
 
-        # 3. Build posterior
-        posterior = inference.build_posterior(density_estimator)
+        for round_idx in range(5):
+            # Simulate from proposal
+            theta = proposal.sample((100,))
+            x = simulator(theta)
 
-        # 4. Sample from posterior
-        x_o = torch.randn(1, 3)
+            # Append simulations and train
+            density_estimator = inference.append_simulations(theta, x).train()
+
+            # Build posterior conditioned on x_o
+            posterior = inference.build_posterior(density_estimator)
+
+            # Update proposal for next round
+            proposal = posterior.set_default_x(x_o)
+
+        # 3. Sample from final posterior
         samples = posterior.sample((1000,), x=x_o)
     """
 

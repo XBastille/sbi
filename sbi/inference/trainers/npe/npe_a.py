@@ -33,18 +33,26 @@ _CORRECTION_EPSILON: float = 1e-6
 class NPE_A(PosteriorEstimatorTrainer):
     r"""Neural Posterior Estimation algorithm as in Papamakarios et al. (2016) [1].
 
-    NPE-A (also known as SNPE-A) trains a neural network to directly approximate
-    the posterior $p(\theta|x)$ using a Mixture of Gaussians. In multi-round
-    inference, it applies a post-hoc analytical correction to account for training
-    with proposal distributions. Due to the analytical correction, this method is
-    restricted to using Mixture of Gaussians (no flows).
-
-    For single-round inference, NPE-A, NPE-B, and NPE-C are equivalent and use
-    plain NLL loss.
-
     [1] *Fast epsilon-free Inference of Simulation Models with Bayesian
         Conditional Density Estimation*, Papamakarios et al., NeurIPS 2016.
         https://arxiv.org/abs/1605.06376
+
+    Like all NPE methods, this method trains a deep neural density estimator to
+    directly approximate the posterior. Also like all other NPE methods, in the
+    first round, this density estimator is trained with a maximum-likelihood loss.
+
+    This class implements NPE-A. NPE-A trains across multiple rounds with a
+    maximum-likelihood loss. This will make training converge to the proposal
+    posterior instead of the true posterior. To correct for this, SNPE-A applies a
+    post-hoc correction after training. This correction is performed analytically
+    and requires Mixture of Gaussians (MoG) density estimators.
+
+    Note:
+        In multi-round SNPE-A, the number of MoG components grows multiplicatively
+        with each round: if the proposal has L components and the density estimator
+        has K components, the corrected posterior has L×K components. For many
+        rounds, consider using SNPE-C (APT) instead, which handles multi-round
+        inference more efficiently.
 
     Example:
     --------

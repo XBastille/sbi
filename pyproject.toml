@@ -40,7 +40,7 @@ dependencies = [
     "scipy",
     "skorch",
     "tensorboard",
-    "torch>=1.13.0, <2.6.0",
+    "torch>=1.13.0",
     "tqdm",
     "zuko>=1.2.0",
 ]
@@ -160,4 +160,14 @@ pythonVersion = "3.10"
 reportUnsupportedDunderAll = false
 reportGeneralTypeIssues = false
 reportInvalidTypeForm = false
+# We disable the following checks to avoid torch related false positives.
+# This is required since torch > 2.5 due to stricter Module/Tensor type stubs.
+reportArgumentType = false
+reportCallIssue = false
+reportOperatorIssue = false
+reportAttributeAccessIssue = false
+reportOptionalOperand = false
+reportIndexIssue = false
+reportReturnType = false
+reportPrivateImportUsage = false
 typeCheckingMode = "basic"

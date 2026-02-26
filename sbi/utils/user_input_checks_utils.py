@@ -61,13 +61,10 @@ def move_distribution_to_device(
         dist.to(device)  # type: ignore
         return dist
     else:
-        # Fast path: reconstruct from arg_constraints for common distributions.
         try:
             params = get_distribution_parameters(dist, device)
             return type(dist)(**params)
         except Exception:
-            # Fallback: recursively move all tensors for complex distributions
-            # (e.g. Independent, MixtureSameFamily, custom distributions).
             move_all_tensor_to_device(dist, device)
             return dist
 
